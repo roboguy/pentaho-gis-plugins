@@ -1,4 +1,4 @@
-package com.atolcd.pentaho.di.gis.utils;
+package com.atolcd.pentaho.di.utils;
 
 /*
  * #%L

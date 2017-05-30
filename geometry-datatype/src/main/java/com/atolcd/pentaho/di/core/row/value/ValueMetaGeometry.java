@@ -60,7 +60,7 @@ import org.postgis.PGgeometryLW;
 import org.postgis.binary.BinaryParser;
 import org.postgis.binary.BinaryWriter;
 
-import com.atolcd.pentaho.di.gis.utils.GeometryUtils;
+import com.atolcd.pentaho.di.utils.GeometryUtils;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ByteOrderValues;

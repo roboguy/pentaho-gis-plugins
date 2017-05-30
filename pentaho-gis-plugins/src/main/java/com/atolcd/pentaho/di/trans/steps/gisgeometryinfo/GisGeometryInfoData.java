@@ -23,12 +23,14 @@ package com.atolcd.pentaho.di.trans.steps.gisgeometryinfo;
  */
 
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepData;
 import org.pentaho.di.trans.step.StepDataInterface;
 
 public class GisGeometryInfoData extends BaseStepData implements StepDataInterface {
 
     public RowMetaInterface outputRowMeta;
+    public ValueMetaInterface geometryInterface;
 
     public GisGeometryInfoData() {
         super();
