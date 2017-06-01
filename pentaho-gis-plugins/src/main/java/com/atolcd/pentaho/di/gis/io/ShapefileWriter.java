@@ -193,7 +193,7 @@ public class ShapefileWriter extends AbstractFileWriter {
                 Feature feature = featureIt.next();
 
                 // Récupération de la géométrie
-                Geometry geometry = (Geometry) feature.getValue(feature.getField(this.geometryFieldName));
+                Geometry geometry = (Geometry) feature.getValue( feature.getField(this.geometryFieldName) );
                 if (geometry instanceof LineString || geometry instanceof Polygon) {
                     geometry = GeometryUtils.getMultiGeometry(geometry);
                 }
