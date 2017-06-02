@@ -11,7 +11,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
   <description>Pentaho's Data Integrator GIS Plugins</description>
 
   <properties>
-    <pentaho.version>5.4.0.1-130</pentaho.version>
+    <pentaho.version>6.1.0.14-354</pentaho.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -153,11 +153,13 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
       <artifactId>jts</artifactId>
       <version>1.13</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/oracle/sdoapi -->
     <dependency>
       <groupId>oracle</groupId>
       <artifactId>sdoapi</artifactId>
       <version>11.2.0</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/oracle/sdoutl -->
     <dependency>
       <groupId>oracle</groupId>
       <artifactId>sdoutl</artifactId>
