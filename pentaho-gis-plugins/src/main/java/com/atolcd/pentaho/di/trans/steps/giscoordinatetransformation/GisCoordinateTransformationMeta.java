@@ -47,6 +47,7 @@ import org.pentaho.di.trans.step.StepDialogInterface;
 import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.metastore.api.IMetaStore;
 import org.w3c.dom.Node;
 
 import com.atolcd.pentaho.di.core.row.value.ValueMetaGeometry;
@@ -147,7 +148,7 @@ public class GisCoordinateTransformationMeta extends BaseStepMeta implements Ste
 
     }
 
-    public void getFields(RowMetaInterface r, String origin, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space) {
+    public void getFields(RowMetaInterface r, String origin, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space, Repository repository, IMetaStore metaStore) {
 
         ValueMetaInterface valueMeta = new ValueMetaGeometry(outputGeometryFieldName);
         valueMeta.setOrigin(origin);
@@ -162,7 +163,7 @@ public class GisCoordinateTransformationMeta extends BaseStepMeta implements Ste
 
     }
 
-    public void loadXML(Node stepnode, List<DatabaseMeta> databases, Map<String, Counter> counters) throws KettleXMLException {
+    public void loadXML( Node stepnode, List<DatabaseMeta> databases, IMetaStore metaStore ) throws KettleXMLException {
 
         try {
 
@@ -187,7 +188,9 @@ public class GisCoordinateTransformationMeta extends BaseStepMeta implements Ste
 
     }
 
-    public void check(List<CheckResultInterface> remarks, TransMeta transmeta, StepMeta stepMeta, RowMetaInterface prev, String input[], String output[], RowMetaInterface info) {
+    public void check( List<CheckResultInterface> remarks, TransMeta transMeta, StepMeta stepMeta,
+                       RowMetaInterface prev, String[] input, String[] output, RowMetaInterface info, VariableSpace space,
+                       Repository repository, IMetaStore metaStore ) {
 
         CheckResult cr;
 
@@ -217,7 +220,7 @@ public class GisCoordinateTransformationMeta extends BaseStepMeta implements Ste
         return new GisCoordinateTransformationData();
     }
 
-    public void readRep(Repository rep, ObjectId id_step, List<DatabaseMeta> databases, Map<String, Counter> counters) throws KettleException {
+    public void readRep( Repository rep, IMetaStore metaStore, ObjectId id_step, List<DatabaseMeta> databases ) throws KettleException {
 
         try {
 
@@ -236,7 +239,7 @@ public class GisCoordinateTransformationMeta extends BaseStepMeta implements Ste
         }
     }
 
-    public void saveRep(Repository rep, ObjectId id_transformation, ObjectId id_step) throws KettleException {
+    public void saveRep(  Repository rep, IMetaStore metaStore, ObjectId id_transformation, ObjectId id_step ) throws KettleException {
 
         try {
 

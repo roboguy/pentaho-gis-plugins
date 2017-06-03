@@ -9,7 +9,7 @@
     <version>0.1.0-SNAPSHOT</version>
 
     <properties>
-        <pentaho.version>5.4.0.1-130</pentaho.version>
+        <pentaho.version>6.1.0.14-354</pentaho.version>
         <license.organizationName>Atol CD</license.organizationName>
         <license.licenseName>lgpl_v3</license.licenseName>
         <license.inceptionYear>2015</license.inceptionYear>
@@ -100,4 +100,34 @@
             <version>1.3.3</version>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <!-- Local repository -->
+        <repository>
+            <id>local-maven-repo</id>
+            <name>Local Maven Repo</name>
+            <url>file://${project.basedir}/../local-maven-repo</url>
+        </repository>
+        <repository>
+            <id>pentaho-releases</id>
+            <url>http://repository.pentaho.org/artifactory/repo/</url>
+        </repository>
+        <repository>
+            <id>lds-main</id>
+            <name>Main Approved LDS Repo</name>
+            <url>http://code.lds.org/nexus/content/groups/main-repo</url>
+        </repository>
+        <repository>
+            <id>maven-us.nuxeo.org</id>
+            <name>maven-us.nuxeo.org</name>
+            <url>http://maven-us.nuxeo.org/nexus/content/groups/public/</url>
+        </repository>
+        <repository>
+            <id>axiomalaska</id>
+            <name>axiomalaska</name>
+            <url>http://nexus.axiomalaska.com/nexus/content/groups/public/</url>
+        </repository>
+    </repositories>
+
+
 </project>

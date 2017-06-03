@@ -32,6 +32,8 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowDataUtil;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.row.value.GeometryInterface;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStep;
@@ -40,8 +42,7 @@ import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 
-import com.atolcd.pentaho.di.core.row.value.ValueMetaGeometry;
-import com.atolcd.pentaho.di.gis.utils.GeometryUtils;
+import com.atolcd.pentaho.di.utils.GeometryUtils;
 import com.vividsolutions.jts.densify.Densifier;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateArrays;
@@ -96,10 +97,11 @@ public class GisGeoprocessing extends BaseStep implements StepInterface {
     private boolean withDistance;
     private boolean withExtractType;
     private boolean withExplode;
+    private ValueMetaInterface geometryInterface;
 
     private Geometry getGeoprocessingResult(Object[] row) throws KettleException {
 
-        Geometry firstGeometry = new ValueMetaGeometry().getGeometry(row[firstGeometryFieldIndex]);
+        Geometry firstGeometry = ((GeometryInterface) geometryInterface).getGeometry(row[firstGeometryFieldIndex]);
 
         Double distance = null;
         if (withDistance) {
@@ -120,7 +122,7 @@ public class GisGeoprocessing extends BaseStep implements StepInterface {
 
         if (withSecondGeometry) {
 
-            Geometry secondGeometry = new ValueMetaGeometry().getGeometry(row[secondGeometryFieldIndex]);
+            Geometry secondGeometry = ((GeometryInterface) geometryInterface).getGeometry(row[secondGeometryFieldIndex]);
             return getTwoGeometriesGeoprocessing(operator, firstGeometry, secondGeometry, distance);
 
         } else {
@@ -216,7 +218,7 @@ public class GisGeoprocessing extends BaseStep implements StepInterface {
             // Récupération des indexes des colonnes contenant les géomrtries
             // d'entrée
             firstGeometryFieldIndex = getInputRowMeta().indexOfValue(meta.getFirstGeometryFieldName());
-
+            geometryInterface = getInputRowMeta().getValueMeta( firstGeometryFieldIndex );
             // Besoin de 2 géométries
             if (ArrayUtils.contains(meta.getTwoGeometriesOperators(), operator)) {
                 withSecondGeometry = true;

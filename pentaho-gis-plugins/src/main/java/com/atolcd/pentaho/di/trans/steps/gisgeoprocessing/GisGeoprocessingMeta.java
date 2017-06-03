@@ -267,7 +267,7 @@ public class GisGeoprocessingMeta extends BaseStepMeta implements StepMetaInterf
 
     }
 
-    public void loadXML(Node stepnode, List<DatabaseMeta> databases, Map<String, Counter> counters) throws KettleXMLException {
+    public void loadXML(Node stepnode, List<DatabaseMeta> databases, Map<String, Counter> counter) throws KettleXMLException {
 
         try {
 

@@ -29,6 +29,7 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowDataUtil;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.value.GeometryInterface;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStep;
@@ -37,8 +38,7 @@ import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 
-import com.atolcd.pentaho.di.core.row.value.ValueMetaGeometry;
-import com.atolcd.pentaho.di.gis.utils.GeometryUtils;
+import com.atolcd.pentaho.di.utils.GeometryUtils;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class GisGeometryInfo extends BaseStep implements StepInterface {
@@ -75,7 +75,7 @@ public class GisGeometryInfo extends BaseStep implements StepInterface {
             // Récupération de l'index de la colonne contenant la géométrie
             // d'entrée
             geometryFieldIndex = getInputRowMeta().indexOfValue(meta.getGeometryFieldName());
-
+            data.geometryInterface = data.outputRowMeta.getValueMeta( geometryFieldIndex );
             // Récupération des infos demandées et des index des colonnes
             // resultats
             for (Entry<String, String> output : meta.getOutputFields().entrySet()) {
@@ -131,7 +131,7 @@ public class GisGeometryInfo extends BaseStep implements StepInterface {
 
         Object[] newRow = RowDataUtil.resizeArray(row, row.length + outputMap.size());
 
-        Geometry geometry = new ValueMetaGeometry().getGeometry(row[geometryFieldIndex]);
+        Geometry geometry = ((GeometryInterface) data.geometryInterface).getGeometry(row[geometryFieldIndex]);
         Object value = null;
 
         for (Entry<String, Integer> output : outputMap.entrySet()) {

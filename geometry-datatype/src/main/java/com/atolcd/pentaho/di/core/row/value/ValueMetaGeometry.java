@@ -36,6 +36,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.Types;
 import java.util.Date;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import oracle.spatial.geometry.JGeometry;
 import oracle.spatial.util.WKT;
 import oracle.sql.STRUCT;
@@ -60,7 +61,6 @@ import org.postgis.PGgeometryLW;
 import org.postgis.binary.BinaryParser;
 import org.postgis.binary.BinaryWriter;
 
-import com.atolcd.pentaho.di.gis.utils.GeometryUtils;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ByteOrderValues;
@@ -129,7 +129,7 @@ public class ValueMetaGeometry extends ValueMetaBase implements GeometryInterfac
 
                     Geometry geometry = getGeometry(object);
 
-                    if (GeometryUtils.getCoordinateDimension(geometry) == 3) {
+                    if (getCoordinateDimension(geometry) == 3) {
                         string = new WKTWriter(3).write(geometry);
                     } else {
                         string = new WKTWriter(2).write(geometry);
@@ -377,7 +377,7 @@ public class ValueMetaGeometry extends ValueMetaBase implements GeometryInterfac
     protected Geometry convertStringToGeometry(String object) throws KettlePluginException {
 
         try {
-            return GeometryUtils.getGeometryFromEWKT(object);
+            return getGeometryFromEWKT(object);
         } catch (Exception e) {
             throw new KettlePluginException(e);
         }
@@ -676,7 +676,7 @@ public class ValueMetaGeometry extends ValueMetaBase implements GeometryInterfac
 
                     String wkt = null;
 
-                    if (GeometryUtils.getCoordinateDimension(geometry) == 3) {
+                    if (getCoordinateDimension(geometry) == 3) {
                         wkt = new WKTWriter(3).write(geometry);
                     } else {
                         wkt = new WKTWriter(2).write(geometry);
@@ -711,7 +711,7 @@ public class ValueMetaGeometry extends ValueMetaBase implements GeometryInterfac
                      * 3005 MULTILINE 2006 3006 MULTIPOLYGON 2007 3007
                      */
 
-                    if (GeometryUtils.getCoordinateDimension(geometry) == 3) {
+                    if (getCoordinateDimension(geometry) == 3) {
                         throw new KettleDatabaseException(toStringMeta() + " : Unable to set Geometry 3D on prepared statement on index " + index);
                     } else {
                         wkt = new WKTWriter(2).write(geometry);
@@ -852,6 +852,97 @@ public class ValueMetaGeometry extends ValueMetaBase implements GeometryInterfac
             return -cmp;
         } else {
             return cmp;
+        }
+    }
+
+    /**
+     * Returns 3 if z coordinate otherwise 2
+     *
+     * @param geometry
+     * @return
+     */
+    public static Integer getCoordinateDimension(Geometry geometry) {
+
+        if (!isNullOrEmptyGeometry(geometry)) {
+            Coordinate firstCoordinate = geometry.getCoordinates()[0];
+            if (!Double.isNaN(firstCoordinate.z)) {
+                return 3;
+            } else {
+                return 2;
+            }
+        }
+
+        return null;
+
+    }
+
+    /**
+     * Returns true if geometry object is null or JTS geometry is empty
+     *
+     * @param geometry
+     * @return
+     */
+    public static boolean isNullOrEmptyGeometry(Geometry geometry) {
+
+        if (geometry != null && !geometry.isEmpty()) {
+            return false;
+        } else {
+            return true;
+        }
+
+    }
+
+    /**
+     * Returns a geometry from WKT/EWKT string
+     *
+     * @param wkt
+     * @return
+     * @throws Exception
+     */
+    public static Geometry getGeometryFromEWKT(String wkt) throws Exception {
+
+        Geometry outputGeometry = null;
+
+        try {
+
+            String wktParts[] = wkt.toUpperCase().split(";");
+
+            if (wktParts[0].replace("SRID=", "").matches("[0-9]+")) {
+
+                outputGeometry = new WKTReader().read(wktParts[1]);
+                outputGeometry.setSRID(Integer.valueOf(wktParts[0].replace("SRID=", "")));
+
+            } else {
+
+                outputGeometry = new WKTReader().read(wktParts[0]);
+            }
+
+        } catch (ParseException e) {
+            throw new Exception("The value \"" + wkt + "\" is not a WKT/EWKT valid string");
+        }
+
+        return getNonEmptyGeometry(outputGeometry.getSRID(), outputGeometry);
+    }
+
+    /**
+     * Returns null if the JTS geometry is empty otherwise geometry
+     *
+     * @param geometry
+     * @return
+     */
+    public static Geometry getNonEmptyGeometry(Integer srid, Geometry geometry) {
+
+        if (!isNullOrEmptyGeometry(geometry)) {
+
+            if (srid != null) {
+                geometry.setSRID(srid);
+                return geometry;
+            } else {
+                return geometry;
+            }
+
+        } else {
+            return null;
         }
     }
 

@@ -22,13 +22,27 @@ package com.atolcd.pentaho.di.trans.steps.giscoordinatetransformation;
  * #L%
  */
 
+import org.cts.CRSFactory;
+import org.cts.op.CoordinateOperation;
+import org.cts.registry.RegistryManager;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepData;
 import org.pentaho.di.trans.step.StepDataInterface;
 
 public class GisCoordinateTransformationData extends BaseStepData implements StepDataInterface {
 
     public RowMetaInterface outputRowMeta;
+    Integer geometryFieldIndex;
+    Integer outputFieldIndex;
+    String crsOperationType = null;
+    ValueMetaInterface geometryValueMeta;
+
+    CRSFactory cRSFactory;
+    RegistryManager registryManager;
+
+    CoordinateOperation transformation = null;
+
 
     public GisCoordinateTransformationData() {
         super();

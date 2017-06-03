@@ -47,7 +47,7 @@ import org.pentaho.di.core.exception.KettleException;
 import com.atolcd.pentaho.di.gis.io.features.Feature;
 import com.atolcd.pentaho.di.gis.io.features.Field;
 import com.atolcd.pentaho.di.gis.io.features.Field.FieldType;
-import com.atolcd.pentaho.di.gis.utils.GeometryUtils;
+import com.atolcd.pentaho.di.utils.GeometryUtils;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -193,7 +193,7 @@ public class ShapefileWriter extends AbstractFileWriter {
                 Feature feature = featureIt.next();
 
                 // Récupération de la géométrie
-                Geometry geometry = (Geometry) feature.getValue(feature.getField(this.geometryFieldName));
+                Geometry geometry = (Geometry) feature.getValue( feature.getField(this.geometryFieldName) );
                 if (geometry instanceof LineString || geometry instanceof Polygon) {
                     geometry = GeometryUtils.getMultiGeometry(geometry);
                 }

@@ -39,6 +39,7 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowDataUtil;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.row.value.GeometryInterface;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStep;
@@ -48,8 +49,8 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 
 import com.atolcd.pentaho.di.core.row.value.ValueMetaGeometry;
-import com.atolcd.pentaho.di.gis.utils.CoordinateTransformer;
-import com.atolcd.pentaho.di.gis.utils.GeometryUtils;
+import com.atolcd.pentaho.di.utils.CoordinateTransformer;
+import com.atolcd.pentaho.di.utils.GeometryUtils;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class GisCoordinateTransformation extends BaseStep implements StepInterface {
@@ -57,24 +58,16 @@ public class GisCoordinateTransformation extends BaseStep implements StepInterfa
     private GisCoordinateTransformationData data;
     private GisCoordinateTransformationMeta meta;
 
-    Integer geometryFieldIndex;
-    Integer outputFieldIndex;
-    String crsOperationType = null;
-    protected ValueMetaInterface geometryValueMeta;
 
-    CRSFactory cRSFactory;
-    RegistryManager registryManager;
-
-    CoordinateOperation transformation = null;
 
     public GisCoordinateTransformation(StepMeta s, StepDataInterface stepDataInterface, int c, TransMeta t, Trans dis) {
         super(s, stepDataInterface, c, t, dis);
 
-        cRSFactory = new CRSFactory();
-        registryManager = cRSFactory.getRegistryManager();
-        registryManager.addRegistry(new IGNFRegistry());
-        registryManager.addRegistry(new EPSGRegistry());
-        registryManager.addRegistry(new ESRIRegistry());
+        data.cRSFactory = new CRSFactory();
+        data.registryManager = data.cRSFactory.getRegistryManager();
+        data.registryManager.addRegistry(new IGNFRegistry());
+        data.registryManager.addRegistry(new EPSGRegistry());
+        data.registryManager.addRegistry(new ESRIRegistry());
     }
 
     public boolean processRow(StepMetaInterface smi, StepDataInterface sdi) throws KettleException {
@@ -98,7 +91,7 @@ public class GisCoordinateTransformation extends BaseStep implements StepInterfa
 
             // Récupération de l'index de la colonne contenant la geométrie
             RowMetaInterface inputRowMeta = getInputRowMeta();
-            geometryFieldIndex = getInputRowMeta().indexOfValue(meta.getGeometryFieldName()); // Récupération
+            data.geometryFieldIndex = getInputRowMeta().indexOfValue(meta.getGeometryFieldName()); // Récupération
                                                                                               // de
                                                                                               // l'index
                                                                                               // de
@@ -107,17 +100,17 @@ public class GisCoordinateTransformation extends BaseStep implements StepInterfa
                                                                                               // contenant
                                                                                               // la
                                                                                               // geométrie
-            geometryValueMeta = inputRowMeta.getValueMeta(geometryFieldIndex);
+            data.geometryValueMeta = inputRowMeta.getValueMeta( data.geometryFieldIndex );
 
             // Récupération de l'index de la colonne contenant le résultat
-            outputFieldIndex = data.outputRowMeta.indexOfValue(meta.getOutputGeometryFieldName());
+            data.outputFieldIndex = data.outputRowMeta.indexOfValue( meta.getOutputGeometryFieldName() );
 
-            crsOperationType = meta.getCrsOperation();
+            data.crsOperationType = meta.getCrsOperation();
 
-            if (crsOperationType.equalsIgnoreCase("REPROJECT")) {
+            if (data.crsOperationType.equalsIgnoreCase("REPROJECT")) {
 
                 if (!meta.isCrsFromGeometry()) {
-                    transformation = getTransformation(meta.getInputCRSAuthority() + ":" + environmentSubstitute(meta.getInputCRSCode()), meta.getOutputCRSAuthority() + ":"
+                    data.transformation = getTransformation(meta.getInputCRSAuthority() + ":" + environmentSubstitute(meta.getInputCRSCode()), meta.getOutputCRSAuthority() + ":"
                             + environmentSubstitute(meta.getOutputCRSCode()));
                 }
 
@@ -127,10 +120,10 @@ public class GisCoordinateTransformation extends BaseStep implements StepInterfa
 
         }
 
-        Object[] outputRow = RowDataUtil.resizeArray(r, r.length + 1);
-        Geometry inGeometry = ((ValueMetaGeometry) geometryValueMeta).getGeometry(r[geometryFieldIndex]);
+        Object[] outputRow = RowDataUtil.resizeArray( r, r.length + 1 );
+        Geometry inGeometry = ((GeometryInterface) data.geometryValueMeta).getGeometry( r[data.geometryFieldIndex] );
 
-        if (crsOperationType.equalsIgnoreCase("ASSIGN")) {
+        if (data.crsOperationType.equalsIgnoreCase("ASSIGN")) {
 
             Geometry outGeometry = (Geometry) inGeometry.clone();
 
@@ -138,7 +131,7 @@ public class GisCoordinateTransformation extends BaseStep implements StepInterfa
                 outGeometry.setSRID(Integer.valueOf(environmentSubstitute(meta.getInputCRSCode())));
             }
 
-            outputRow[outputFieldIndex] = outGeometry;
+            outputRow[data.outputFieldIndex] = outGeometry;
 
         } else {
 
@@ -148,7 +141,7 @@ public class GisCoordinateTransformation extends BaseStep implements StepInterfa
 
                     if (inGeometry.getSRID() > 0) {
 
-                        transformation = getTransformation("EPSG:" + inGeometry.getSRID(), meta.getOutputCRSAuthority() + ":" + environmentSubstitute(meta.getOutputCRSCode()));
+                        data.transformation = getTransformation("EPSG:" + inGeometry.getSRID(), meta.getOutputCRSAuthority() + ":" + environmentSubstitute(meta.getOutputCRSCode()));
 
                     } else {
                         throw new KettleException("Transformation error : Unknown SRID for geometry " + inGeometry.toString());
@@ -159,8 +152,8 @@ public class GisCoordinateTransformation extends BaseStep implements StepInterfa
             }
 
             Geometry outGeometry = null;
-            if (transformation != null) {
-                outGeometry = CoordinateTransformer.transform(inGeometry, transformation);
+            if (data.transformation != null) {
+                outGeometry = CoordinateTransformer.transform(inGeometry, data.transformation);
             }
 
             // Assignation SRID si EPSG
@@ -168,7 +161,7 @@ public class GisCoordinateTransformation extends BaseStep implements StepInterfa
                 outGeometry.setSRID(Integer.valueOf(environmentSubstitute(meta.getOutputCRSCode())));
             }
 
-            outputRow[outputFieldIndex] = outGeometry;
+            outputRow[data.outputFieldIndex] = outGeometry;
 
         }
 
@@ -201,8 +194,8 @@ public class GisCoordinateTransformation extends BaseStep implements StepInterfa
         // Création de la transformation à partir des CRS entrées et sorties
         try {
 
-            CoordinateReferenceSystem inputCRS = cRSFactory.getCRS(inputCRSCode);
-            CoordinateReferenceSystem outputCRS = cRSFactory.getCRS(outputCRSCode);
+            CoordinateReferenceSystem inputCRS = data.cRSFactory.getCRS(inputCRSCode);
+            CoordinateReferenceSystem outputCRS = data.cRSFactory.getCRS(outputCRSCode);
             List<CoordinateOperation> transformations = CoordinateOperationFactory.createCoordinateOperations((GeodeticCRS) inputCRS, (GeodeticCRS) outputCRS);
 
             if (!transformations.isEmpty()) {
